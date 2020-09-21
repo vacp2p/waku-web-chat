@@ -1,0 +1,60 @@
+@import 'tachyons';
+
+@font-face {
+  font-family: 'Nexa';
+  font-style: normal;
+  font-weight: 400;
+  src: url('fonts/Nexa_Free_Light.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Nexa';
+  font-style: bold;
+  font-weight: 700;
+  src: url('fonts/Nexa_Free_Bold.otf') format('opentype');
+}
+
+.nexa { font-family: 'Nexa', 'Verdana', system-ui, sans-serif; }
+.bg-dark-blue { background-color: #14162D; }
+
+
+.chat-header {
+  font-size: 0.8em;
+}
+.chat-body {
+  margin: 1em 0;
+}
+.chat-body p {
+  margin: 0.25em 0;
+}
+.chat-time {
+  float: right;
+}
+.right { text-align: right; }
+.right .chat-time {
+  float: left;
+}
+
+.dot {
+  height: 18px;
+  width: 18px;
+  background-color: #999;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.bg-libp2p-dark-aqua {
+  background-color: #22616A;
+}
+
+.bg-libp2p-dark-purple {
+  background-color: #791B89;
+}
+
+.bg-libp2p-dark-orange {
+  background-color: #E88900;
+}
+
+.bg-libp2p-dark-green {
+  background-color: #A3AA12;
+}
