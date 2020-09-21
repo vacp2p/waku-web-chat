@@ -1,0 +1,12 @@
+--- node_modules/libp2p-gossipsub/src/constants.js	1985-10-26 16:15:00.000000000 +0800
++++ patches/waku-hack-libp2p-gossipsub-constants.js	2020-09-19 14:32:31.012286382 +0800
+@@ -9,7 +9,8 @@
+  * The protocol ID for version 1.0.0 of the Gossipsub protocol
+  * It is advertised along with GossipsubIDv11 for backwards compatability
+  */
+-exports.GossipsubIDv10 = '/meshsub/1.0.0';
++// HACK: Override GossipsubIDv10 multicodec to get matching protocol ish
++exports.GossipsubIDv10 = '/vac/waku/relay/2.0.0-beta1';
+ /**
+  * The protocol ID for version 1.1.0 of the Gossipsub protocol
+  * See the spec for details about how v1.1.0 compares to v1.0.0:
