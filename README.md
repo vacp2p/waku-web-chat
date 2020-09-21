@@ -35,6 +35,8 @@ cd nodejs
 npm start 
 ```
 
+It may take a while for the browser node to connect with the nodejs node.
+
 You may start multiple browser or nodejs nodes but only one bootstrap node.
 
 ## Patches
@@ -61,3 +63,8 @@ Call nodejs node with it as argument:
 ``` sh
 node index.js /ip4/0.0.0.0/tcp/60000/p2p/16Uiu2HAmVKynP3QDpjxS2gujvy2Bp3BEKp8NzKmYspxDEVAGHftG
 ```
+
+You should notice in the nim-waku logs that messages are getting through. However, the protobuf isn't parsed.
+
+The WakuMessage wrapper is also missing, meaning this current implementation is
+not according to spec.
