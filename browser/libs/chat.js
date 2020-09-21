@@ -188,4 +188,4 @@ class Chat extends EventEmitter {
 }
 
 module.exports = Chat
-module.exports.TOPIC = '/libp2p/example/chat/1.0.0'
+module.exports.TOPIC = 'waku'
