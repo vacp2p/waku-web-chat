@@ -20,9 +20,12 @@ const MDNS = require('libp2p-mdns')
 const KadDHT = require('libp2p-kad-dht')
 // PubSub implementation
 const Gossipsub = require('libp2p-gossipsub')
+// Multiaddress
+const multiaddr = require('multiaddr')
 
 ;(async () => {
   // Create the Node
+  //
   const libp2p = await Libp2p.create({
     addresses: {
       listen: [
@@ -66,6 +69,24 @@ const Gossipsub = require('libp2p-gossipsub')
 
     // Start libp2p
   await libp2p.start()
+
+  console.log('listening on addresses:')
+  libp2p.multiaddrs.forEach(addr => {
+    console.log(`${addr.toString()}/p2p/${libp2p.peerId.toB58String()}`)
+  })
+
+  console.log('\nNode supports protocols:')
+  libp2p.upgrader.protocols.forEach((_, p) => console.log(p))
+
+  const codec = "/vac/waku/relay/2.0.0-beta1"
+
+  //    Dial nim-waku
+  if (process.argv.length >= 3) {
+    const ma = multiaddr(process.argv[2])
+    console.log(`dialing remote peer at ${process.argv[2]}`)
+    await libp2p.dialProtocol(ma, codec)
+    console.log(`dialed ${process.argv[2]}`)
+  }
 
   // Create our PubsubChat client
   const pubsubChat = new PubsubChat(libp2p, PubsubChat.TOPIC, ({ from, message }) => {
