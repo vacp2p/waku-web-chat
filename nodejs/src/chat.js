@@ -89,6 +89,7 @@ class Chat {
   join () {
     this.libp2p.pubsub.subscribe(this.topic, (message) => {
       try {
+        console.info("Received message on topic, trying to decode...")
         const request = Request.decode(message.data)
         switch (request.type) {
           case Request.Type.UPDATE_PEER:
