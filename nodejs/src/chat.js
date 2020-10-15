@@ -1,6 +1,12 @@
 const protons = require('protons')
 
-const { Request, Stats } = protons(`
+const { Request, Stats, WakuMessage } = protons(`
+message WakuMessage {
+  optional bytes payload = 1;
+  optional string contentTopic = 2;
+  optional string version = 3;
+}
+
 message Request {
   enum Type {
     SEND_MESSAGE = 0;
@@ -65,6 +71,25 @@ class Chat {
 
     // Join if libp2p is already on
     if (this.libp2p.isStarted()) this.join()
+
+    // Experimental feature flag for WIP WakuMessage usage.
+    //
+    // If this flag is enabled:
+    // - This impl is according to spec
+    // - Messages are published and subscribed on as WakuMessage
+    // - Messages published here show up on nim-waku in clear text
+    // - Messages published on nim-waku for some reason don't show up here yet
+    // - No other Requests works, such as Stats etc
+    // - No interop with browser yet
+    //
+    // If it isn't enabled:
+    // - Largely inverse of above, notably not according to spec
+    // - No real interop with nim-waku
+    // - On flip side, nice UI with browser and Stats/Nick etc
+    this.useWakuMessage = false
+
+    console.info("Using WakuMessage?", this.useWakuMessage)
+
   }
 
   /**
@@ -90,8 +115,16 @@ class Chat {
     this.libp2p.pubsub.subscribe(this.topic, (message) => {
       try {
         console.info("Received message on topic, trying to decode...")
-        const request = Request.decode(message.data)
-        switch (request.type) {
+        if (this.useWakuMessage) {
+          console.info("Reading message as a WakuMessage")
+          const msg = WakuMessage.decode(message.data)
+          console.info("WakuMessage: ", msg.contentTopic, msg.payload)
+        }
+        else {
+          //TODO Figure out how to re-enable / remove wrt chat2 example
+          console.info("Reading message as a Request")
+          const request = Request.decode(message.data)
+          switch (request.type) {
           case Request.Type.UPDATE_PEER:
             const newHandle = request.updatePeer.userHandle.toString()
             console.info(`System: ${message.from} is now ${newHandle}.`)
@@ -105,7 +138,9 @@ class Chat {
             break
           default:
             // Do nothing
+          }
         }
+
       } catch (err) {
         console.error(err)
       }
@@ -139,6 +174,8 @@ class Chat {
     }
     return false
   }
+
+  // TODO Update these to use WakuMessage
 
   /**
    * Sends a message over pubsub to update the user handle
@@ -186,15 +223,24 @@ class Chat {
    * @param {Buffer|string} message The chat message to send
    */
   async send (message) {
-    const msg = Request.encode({
-      type: Request.Type.SEND_MESSAGE,
-      sendMessage: {
-        id: (~~(Math.random() * 1e9)).toString(36) + Date.now(),
-        data: Buffer.from(message),
-        created: Date.now()
-      }
-    })
-
+    var msg
+    // NOTE Conditionally wrap in WakuMessage or not
+    if (this.useWakuMessage) {
+      msg = WakuMessage.encode({
+        contentTopic: 'dingpu',
+        payload: Buffer.from(message)
+      })
+    }
+    else {
+      msg = Request.encode({
+        type: Request.Type.SEND_MESSAGE,
+        sendMessage: {
+          id: (~~(Math.random() * 1e9)).toString(36) + Date.now(),
+          data: Buffer.from(message),
+          created: Date.now()
+        }
+      })
+    }
     await this.libp2p.pubsub.publish(this.topic, msg)
   }
 }
