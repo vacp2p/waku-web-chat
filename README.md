@@ -68,3 +68,7 @@ You should notice in the nim-waku logs that messages are getting through. Howeve
 
 The WakuMessage wrapper is also missing, meaning this current implementation is
 not according to spec.
+
+## Experimental WakuMessage support
+
+For https://github.com/vacp2p/waku-web-chat/issues/1 see nodejs/src. There's a flag there for using WakuMessage, as well as notes on current state.
