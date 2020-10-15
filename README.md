@@ -31,7 +31,7 @@ node index.js
 Run browser node:
 
 ``` sh
-cd nodejs
+cd browser
 npm start 
 ```
 
