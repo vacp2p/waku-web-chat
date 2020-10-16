@@ -1,7 +1,13 @@
 const protons = require('protons')
 const EventEmitter = require('events')
 
-const { Request, Stats } = protons(`
+const { Request, Stats, WakuMessage } = protons(`
+message WakuMessage {
+  optional bytes payload = 1;
+  optional string contentTopic = 2;
+  optional string version = 3;
+}
+
 message Request {
   enum Type {
     SEND_MESSAGE = 0;
@@ -66,6 +72,24 @@ class Chat extends EventEmitter {
 
     // Join if libp2p is already on
     if (this.libp2p.isStarted()) this.join()
+
+    // Experimental feature flag for WIP WakuMessage usage.
+    //
+    // If this flag is enabled:
+    // TODO
+    // - This implementation is according to spec
+    // - Messages are published and subscribed on as WakuMessage
+    // - No other Requests works, such as Stats etc
+    // - No interop with nodejs yet
+    //
+    // If it isn't enabled:
+    // - Largely inverse of above, notably not according to spec
+    // - No real interop with nim-waku
+    // - On flip side, nice UI with browser and Stats/Nick etc
+    this.useWakuMessage = true
+
+    console.info("Using WakuMessage?", this.useWakuMessage)
+
   }
 
   /**
@@ -77,24 +101,34 @@ class Chat extends EventEmitter {
     this.libp2p.pubsub.subscribe(this.topic, (message) => {
       try {
         console.info("Received message on topic, trying to decode...")
-        const request = Request.decode(message.data)
-        switch (request.type) {
-          case Request.Type.UPDATE_PEER:
-            this.emit('peer:update', {
-              id: message.from,
-              name: request.updatePeer.userHandle.toString()
-            })
-            break
-          case Request.Type.STATS:
-            this.stats.set(message.from, request.stats)
-            console.log('Incoming Stats:', message.from, request.stats)
-            this.emit('stats', this.stats)
-            break
-          default:
-            this.emit('message', {
-              from: message.from,
-              ...request.sendMessage
-            })
+        if (this.useWakuMessage) {
+          console.info("Reading message as a WakuMessage")
+          const msg = WakuMessage.decode(message.data)
+          // XXX: Might not always work...
+          const text = String.fromCharCode(...msg.payload)
+          console.info("WakuMessage: ", msg.contentTopic, text)
+        }
+        else {
+          //TODO Figure out how to re-enable / remove wrt chat2 example
+          const request = Request.decode(message.data)
+          switch (request.type) {
+            case Request.Type.UPDATE_PEER:
+              this.emit('peer:update', {
+                id: message.from,
+                name: request.updatePeer.userHandle.toString()
+              })
+              break
+            case Request.Type.STATS:
+              this.stats.set(message.from, request.stats)
+              console.log('Incoming Stats:', message.from, request.stats)
+              this.emit('stats', this.stats)
+              break
+            default:
+              this.emit('message', {
+                from: message.from,
+                ...request.sendMessage
+              })
+          }
         }
       } catch (err) {
         console.error(err)
@@ -170,20 +204,30 @@ class Chat extends EventEmitter {
     }
   }
 
+
   /**
    * Publishes the given `message` to pubsub peers
    * @param {Buffer|string} message The chat message to send
    */
   async send (message) {
-    const msg = Request.encode({
-      type: Request.Type.SEND_MESSAGE,
-      sendMessage: {
-        id: (~~(Math.random() * 1e9)).toString(36) + Date.now(),
-        data: Buffer.from(message),
-        created: Date.now()
-      }
-    })
-
+    var msg
+    // NOTE Conditionally wrap in WakuMessage or not
+    if (this.useWakuMessage) {
+      msg = WakuMessage.encode({
+        contentTopic: 'dingpu',
+        payload: Buffer.from(message)
+      })
+    }
+    else {
+      msg = Request.encode({
+        type: Request.Type.SEND_MESSAGE,
+        sendMessage: {
+          id: (~~(Math.random() * 1e9)).toString(36) + Date.now(),
+          data: Buffer.from(message),
+          created: Date.now()
+        }
+      })
+    }
     await this.libp2p.pubsub.publish(this.topic, msg)
   }
 }

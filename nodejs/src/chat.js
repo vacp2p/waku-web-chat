@@ -75,10 +75,8 @@ class Chat {
     // Experimental feature flag for WIP WakuMessage usage.
     //
     // If this flag is enabled:
-    // - This impl is according to spec
+    // - This implementation is according to spec
     // - Messages are published and subscribed on as WakuMessage
-    // - Messages published here show up on nim-waku in clear text
-    // - Messages published on nim-waku for some reason don't show up here yet
     // - No other Requests works, such as Stats etc
     // - No interop with browser yet
     //
@@ -86,7 +84,7 @@ class Chat {
     // - Largely inverse of above, notably not according to spec
     // - No real interop with nim-waku
     // - On flip side, nice UI with browser and Stats/Nick etc
-    this.useWakuMessage = false
+    this.useWakuMessage = true
 
     console.info("Using WakuMessage?", this.useWakuMessage)
 
