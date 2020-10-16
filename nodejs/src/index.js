@@ -58,6 +58,12 @@ const multiaddr = require('multiaddr')
         randomWalk: {
           enabled: true
         }
+      },
+      pubsub: {
+        enabled: true,
+        emitSelf: true,
+        signMessages: false,
+        strictSigning: false
       }
     }
   })

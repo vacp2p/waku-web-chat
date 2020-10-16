@@ -43,6 +43,12 @@ const createLibp2p = async (peerId) => {
         randomWalk: {
           enabled: true
         }
+      },
+      pubsub: {
+        enabled: true,
+        emitSelf: true,
+        signMessages: false,
+        strictSigning: false
       }
     }
   })
