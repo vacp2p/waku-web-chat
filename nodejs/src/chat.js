@@ -118,7 +118,9 @@ class Chat {
         if (this.useWakuMessage) {
           console.info("Reading message as a WakuMessage")
           const msg = WakuMessage.decode(message.data)
-          console.info("WakuMessage: ", msg.contentTopic, msg.payload)
+          // XXX: Might not always work...
+          const text = String.fromCharCode(...msg.payload)
+          console.info("WakuMessage: ", msg.contentTopic, text)
         }
         else {
           //TODO Figure out how to re-enable / remove wrt chat2 example
