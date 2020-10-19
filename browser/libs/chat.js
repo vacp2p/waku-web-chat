@@ -107,7 +107,13 @@ class Chat extends EventEmitter {
           // XXX: Might not always work...
           const text = String.fromCharCode(...msg.payload)
           console.info("WakuMessage: ", msg.contentTopic, text)
+
+          this.emit('message', {
+            from: "Unknown",
+            data: text
+          })
         }
+
         else {
           //TODO Figure out how to re-enable / remove wrt chat2 example
           const request = Request.decode(message.data)
