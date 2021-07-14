@@ -1,3 +1,5 @@
+# DEPRECATED: See js-waku https://github.com/status-im/js-waku for a better and up to date version
+
 # Waku Web Chat Example
 
 This is just a POC to showcase Waku usage from the browser.
